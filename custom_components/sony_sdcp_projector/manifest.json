@@ -11,7 +11,7 @@
   "issue_tracker": "https://github.com/zacharee/sony-sdcp-projector/issues",
   "iot_class": "local_polling",
   "requirements": [
-    "git+https://github.com/kennymc-c/pySDCP-extended@0.2.1"
+    "pysdcp_extended@git+https://github.com/kennymc-c/pySDCP-extended.git@0.2.1"
   ],
   "version": "1.0.0"
 }
