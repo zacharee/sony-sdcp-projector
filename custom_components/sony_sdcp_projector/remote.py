@@ -9,7 +9,7 @@ from typing import Any
 import asyncio
 import logging
 
-from homeassistant.components.remote import ATTR_NUM_REPEATS, RemoteEntity
+from homeassistant.components.remote import ATTR_NUM_REPEATS, RemoteEntity, RemoteEntityFeature
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
@@ -76,6 +76,7 @@ class SonySDCPRemote(RemoteEntity):
         self._available = False
         self._attr_unique_id = unique_id
         self._attr_current_activity = None
+        self._attr_supported_features = RemoteEntityFeature.ACTIVITY
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, unique_id)},
             manufacturer=ATTR_MANUFACTURER,
