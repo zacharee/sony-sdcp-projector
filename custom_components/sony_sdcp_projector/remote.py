@@ -10,6 +10,7 @@ import asyncio
 import logging
 
 from homeassistant.components.remote import ATTR_NUM_REPEATS, RemoteEntity, RemoteEntityFeature
+from homeassistant.components.sensor import SensorEntity, SensorDeviceClass, SensorStateClass
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
@@ -61,6 +62,45 @@ async def async_setup_entry(
     async_add_entities([remote])
 
 
+class SonySDCPStatus(SensorEntity):
+    def __init__(
+            self,
+            sdcp: Projector,
+            unique_id: str,
+    ) -> None:
+        self._sdcp = sdcp
+        self._name = f"{ATTR_MANUFACTURER} {ATTR_MODEL} Status"
+        self._attr_native_value = None
+        self._attr_state_class = None
+        self._attr_unique_id = unique_id
+        self._attr_device_class = SensorDeviceClass.ENUM
+        self._available = None
+        self._attr_device_info = DeviceInfo(
+            identifiers={(DOMAIN, unique_id)},
+            manufacturer=ATTR_MANUFACTURER,
+            model=ATTR_MODEL,
+            name=self._name,
+        )
+
+    async def async_update(self) -> None:
+        _LOGGER.debug("Updating the state of '%s'", self.name)
+
+        # noinspection protected-member
+        try:
+            self._attr_native_value = await (self.hass.async_add_executor_job(lambda:
+                                                                              self._sdcp._send_command(
+                                                                                  action=ACTIONS["GET"],
+                                                                                  command=COMMANDS[
+                                                                                      "GET_STATUS_POWER"],
+                                                                              )
+                                                                              )
+                                             )
+            self._available = True
+        except ConnectionRefusedError:
+            _LOGGER.error("Projector connection refused")
+            self._available = False
+
+
 class SonySDCPRemote(RemoteEntity):
     """Representation of a Bravia TV Remote."""
 
@@ -76,7 +116,6 @@ class SonySDCPRemote(RemoteEntity):
         self._available = False
         self._attr_unique_id = unique_id
         self._attr_current_activity = None
-        self._attr_supported_features = RemoteEntityFeature.ACTIVITY
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, unique_id)},
             manufacturer=ATTR_MANUFACTURER,
@@ -99,11 +138,6 @@ class SonySDCPRemote(RemoteEntity):
         """Return true if device is on."""
         return self._state
 
-    @property
-    def current_activity(self) -> str | None:
-        return self._attr_current_activity
-
-    # noinspection protected-member
     async def async_update(self) -> None:
         """Get the latest state from the projector."""
         _LOGGER.debug("Updating the state of '%s'", self.name)
@@ -113,14 +147,6 @@ class SonySDCPRemote(RemoteEntity):
 
         try:
             self._state = await self.hass.async_add_executor_job(self._sdcp.get_power)
-            self._attr_current_activity = await (self.hass.async_add_executor_job(lambda:
-                                                                                  self._sdcp._send_command(
-                                                                                      action=ACTIONS["GET"],
-                                                                                      command=COMMANDS[
-                                                                                          "GET_STATUS_POWER"],
-                                                                                  )
-                                                                                  )
-                                                 )
             self._available = True
         except ConnectionRefusedError:
             _LOGGER.error("Projector connection refused")
