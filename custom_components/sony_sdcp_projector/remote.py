@@ -15,7 +15,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.device_registry import DeviceInfo
 
-from pysdcp import Projector
+from pysdcp_extended import Projector, ACTIONS, COMMANDS
 
 from .const import ATTR_MANUFACTURER, ATTR_MODEL, DOMAIN
 
@@ -41,9 +41,9 @@ _LOGGER = logging.getLogger(__name__)
 
 
 async def async_setup_entry(
-    hass: HomeAssistant,
-    config_entry: ConfigEntry,
-    async_add_entities: AddEntitiesCallback,
+        hass: HomeAssistant,
+        config_entry: ConfigEntry,
+        async_add_entities: AddEntitiesCallback,
 ) -> None:
     """Set up Sony SDCP Projector Remote from a config entry."""
 
@@ -65,9 +65,9 @@ class SonySDCPRemote(RemoteEntity):
     """Representation of a Bravia TV Remote."""
 
     def __init__(
-        self,
-        sdcp: Projector,
-        unique_id: str,
+            self,
+            sdcp: Projector,
+            unique_id: str,
     ) -> None:
         """Initialize Sony SDCP Projector remote."""
         self._sdcp = sdcp
@@ -75,6 +75,7 @@ class SonySDCPRemote(RemoteEntity):
         self._state = None
         self._available = False
         self._attr_unique_id = unique_id
+        self._attr_current_activity = None
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, unique_id)},
             manufacturer=ATTR_MANUFACTURER,
@@ -97,6 +98,11 @@ class SonySDCPRemote(RemoteEntity):
         """Return true if device is on."""
         return self._state
 
+    @property
+    def current_activity(self) -> str | None:
+        return self._attr_current_activity
+
+    # noinspection protected-member
     async def async_update(self) -> None:
         """Get the latest state from the projector."""
         _LOGGER.debug("Updating the state of '%s'", self.name)
@@ -106,6 +112,14 @@ class SonySDCPRemote(RemoteEntity):
 
         try:
             self._state = await self.hass.async_add_executor_job(self._sdcp.get_power)
+            self._attr_current_activity = await (self.hass.async_add_executor_job(lambda:
+                                                                                  self._sdcp._send_command(
+                                                                                      action=ACTIONS["GET"],
+                                                                                      command=COMMANDS[
+                                                                                          "GET_STATUS_POWER"],
+                                                                                  )
+                                                                                  )
+                                                 )
             self._available = True
         except ConnectionRefusedError:
             _LOGGER.error("Projector connection refused")

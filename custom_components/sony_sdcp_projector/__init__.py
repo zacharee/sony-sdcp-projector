@@ -6,7 +6,7 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import Platform, CONF_HOST
 from homeassistant.core import HomeAssistant
 
-from pysdcp import Projector
+from pysdcp_extended import Projector
 
 from .const import DOMAIN
 
