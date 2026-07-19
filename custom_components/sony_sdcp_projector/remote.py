@@ -54,12 +54,15 @@ async def async_setup_entry(
     assert unique_id is not None
 
     remote = SonySDCPRemote(sdcp, unique_id)
+    status = SonySDCPStatus(sdcp, f"{unique_id}_status")
 
     # Manually update the entity to fetch the initial state
     remote.hass = hass
+    status.hass = hass
     await remote.async_update()
+    await status.async_update()
 
-    async_add_entities([remote])
+    async_add_entities([remote, status])
 
 
 class SonySDCPStatus(SensorEntity):
