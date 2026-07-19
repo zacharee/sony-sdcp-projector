@@ -9,7 +9,7 @@ from functools import partial
 from typing import Any
 
 from homeassistant.components.remote import ATTR_NUM_REPEATS, RemoteEntity
-from homeassistant.components.sensor import SensorEntity, SensorDeviceClass
+from homeassistant.components.sensor import SensorEntity, SensorDeviceClass, SensorStateClass
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.device_registry import DeviceInfo
@@ -51,7 +51,7 @@ async def async_setup_entry(
     assert unique_id is not None
 
     remote = SonySDCPRemote(sdcp, unique_id)
-    status = SonySDCPStatus(sdcp, f"{unique_id}_status")
+    status = SonySDCPStatus(sdcp, unique_id)
 
     # Manually update the entity to fetch the initial state
     remote.hass = hass
@@ -73,7 +73,7 @@ class SonySDCPStatus(SensorEntity):
         self._attr_native_value = None
         self._attr_state_class = None
         self._attr_unique_id = unique_id
-        self._attr_device_class = SensorDeviceClass.ENUM
+        self._attr_device_class = None
         self._available = None
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, unique_id)},
