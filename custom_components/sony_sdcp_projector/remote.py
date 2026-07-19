@@ -2,23 +2,19 @@
 
 from __future__ import annotations
 
+import asyncio
+import logging
 from collections.abc import Iterable
 from functools import partial
 from typing import Any
 
-import asyncio
-import logging
-
-from homeassistant.components.remote import ATTR_NUM_REPEATS, RemoteEntity, RemoteEntityFeature
-from homeassistant.components.sensor import SensorEntity, SensorDeviceClass, SensorStateClass
+from homeassistant.components.remote import ATTR_NUM_REPEATS, RemoteEntity
+from homeassistant.components.sensor import SensorEntity, SensorDeviceClass
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
-from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.device_registry import DeviceInfo
-
+from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from pysdcp_extended import Projector, ACTIONS, COMMANDS
-
-from .const import ATTR_MANUFACTURER, ATTR_MODEL, DOMAIN
 
 from .commands import (
     POWER_ON,
@@ -37,6 +33,7 @@ from .commands import (
     PICTURE_POSITION_CUSTOM_2,
     PICTURE_POSITION_CUSTOM_3,
 )
+from .const import ATTR_MANUFACTURER, ATTR_MODEL, DOMAIN
 
 _LOGGER = logging.getLogger(__name__)
 
