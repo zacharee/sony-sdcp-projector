@@ -10,7 +10,7 @@ from pysdcp_extended import Projector
 
 from .const import DOMAIN
 
-PLATFORMS: list[Platform] = [Platform.REMOTE]
+PLATFORMS: list[Platform] = [Platform.REMOTE, Platform.SENSOR]
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:

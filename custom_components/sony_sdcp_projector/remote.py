@@ -9,12 +9,11 @@ from functools import partial
 from typing import Any
 
 from homeassistant.components.remote import ATTR_NUM_REPEATS, RemoteEntity
-from homeassistant.components.sensor import SensorEntity, SensorDeviceClass, SensorStateClass
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
-from pysdcp_extended import Projector, ACTIONS, COMMANDS
+from pysdcp_extended import Projector
 
 from .commands import (
     POWER_ON,
@@ -51,54 +50,12 @@ async def async_setup_entry(
     assert unique_id is not None
 
     remote = SonySDCPRemote(sdcp, unique_id)
-    status = SonySDCPStatus(sdcp, unique_id)
 
     # Manually update the entity to fetch the initial state
     remote.hass = hass
-    status.hass = hass
     await remote.async_update()
-    await status.async_update()
 
-    async_add_entities([remote, status])
-
-
-class SonySDCPStatus(SensorEntity):
-    def __init__(
-            self,
-            sdcp: Projector,
-            unique_id: str,
-    ) -> None:
-        self._sdcp = sdcp
-        self._name = f"{ATTR_MANUFACTURER} {ATTR_MODEL} Status"
-        self._attr_native_value = None
-        self._attr_state_class = None
-        self._attr_unique_id = unique_id
-        self._attr_device_class = None
-        self._available = None
-        self._attr_device_info = DeviceInfo(
-            identifiers={(DOMAIN, unique_id)},
-            manufacturer=ATTR_MANUFACTURER,
-            model=ATTR_MODEL,
-            name=self._name,
-        )
-
-    async def async_update(self) -> None:
-        _LOGGER.debug("Updating the state of '%s'", self.name)
-
-        # noinspection protected-member
-        try:
-            self._attr_native_value = await (self.hass.async_add_executor_job(lambda:
-                                                                              self._sdcp._send_command(
-                                                                                  action=ACTIONS["GET"],
-                                                                                  command=COMMANDS[
-                                                                                      "GET_STATUS_POWER"],
-                                                                              )
-                                                                              )
-                                             )
-            self._available = True
-        except ConnectionRefusedError:
-            _LOGGER.error("Projector connection refused")
-            self._available = False
+    async_add_entities([remote])
 
 
 class SonySDCPRemote(RemoteEntity):
