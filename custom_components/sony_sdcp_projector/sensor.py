@@ -7,7 +7,7 @@ from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from pysdcp_extended import Projector, ACTIONS, COMMANDS
 
-from custom_components.sony_sdcp_projector.const import ATTR_MODEL, ATTR_MANUFACTURER, DOMAIN
+from .const import ATTR_MODEL, ATTR_MANUFACTURER, DOMAIN
 
 _LOGGER = logging.getLogger(__name__)
 
