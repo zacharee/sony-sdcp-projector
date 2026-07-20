@@ -5,6 +5,7 @@ from __future__ import annotations
 import asyncio
 import logging
 from collections.abc import Iterable
+from datetime import timedelta
 from functools import partial
 from typing import Any
 
@@ -36,6 +37,7 @@ from .const import ATTR_MANUFACTURER, ATTR_MODEL, DOMAIN
 
 _LOGGER = logging.getLogger(__name__)
 
+SCAN_INTERVAL = timedelta(seconds=5)
 
 async def async_setup_entry(
         hass: HomeAssistant,
